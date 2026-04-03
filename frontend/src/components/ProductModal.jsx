@@ -11,7 +11,6 @@ export default function ProductModal({ onClose, product }) {
   const [colores, setColores] = useState([]);
   const [fotos, setFotos] = useState([]);
   const [fotosPreview, setFotosPreview] = useState([]);
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -74,9 +73,6 @@ export default function ProductModal({ onClose, product }) {
   const removePhoto = (index) => {
     setFotosPreview(fotosPreview.filter((_, i) => i !== index));
     setFotos(fotos.filter((_, i) => i !== index));
-    if (currentPhotoIndex >= fotosPreview.length - 1) {
-      setCurrentPhotoIndex(Math.max(0, fotosPreview.length - 2));
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -189,77 +185,82 @@ export default function ProductModal({ onClose, product }) {
           </div>
 
           <div className="form-section">
-            <label className="form-label">Fotos (máximo 5)</label>
+            <label className="form-label">Galería de Fotos</label>
             
-            {fotosPreview.length > 0 && (
-              <div className="photo-carousel">
-                <div className="carousel-main">
-                  <img 
-                    src={fotosPreview[currentPhotoIndex]} 
-                    alt="Preview" 
-                    className="carousel-image"
-                  />
-                  
-                  {fotosPreview.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentPhotoIndex(Math.max(0, currentPhotoIndex - 1))}
-                        className="carousel-button carousel-prev"
-                        disabled={currentPhotoIndex === 0}
-                        data-testid="carousel-prev-button"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentPhotoIndex(Math.min(fotosPreview.length - 1, currentPhotoIndex + 1))}
-                        className="carousel-button carousel-next"
-                        disabled={currentPhotoIndex === fotosPreview.length - 1}
-                        data-testid="carousel-next-button"
-                      >
-                        ›
-                      </button>
-                    </>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(currentPhotoIndex)}
-                    className="remove-photo-button"
-                    data-testid="remove-photo-button"
-                  >
-                    Eliminar Foto
-                  </button>
-                </div>
+            {fotosPreview.length > 0 ? (
+              <div className="photos-gallery">
+                {fotosPreview.map((foto, index) => (
+                  <div key={index} className="photo-thumbnail-card" data-testid="photo-thumbnail">
+                    <div className="photo-thumbnail-wrapper">
+                      <img 
+                        src={foto} 
+                        alt={`Foto ${index + 1}`} 
+                        className="photo-thumbnail-image"
+                      />
+                      <div className="photo-thumbnail-overlay">
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(index)}
+                          className="photo-remove-icon"
+                          data-testid="remove-photo-button"
+                          title="Eliminar"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      </div>
+                      {index === 0 && (
+                        <div className="photo-principal-badge">Principal</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
                 
-                <div className="carousel-indicators">
-                  {fotosPreview.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setCurrentPhotoIndex(index)}
-                      className={`carousel-indicator ${index === currentPhotoIndex ? 'active' : ''}`}
-                      data-testid="carousel-indicator"
+                {fotosPreview.length < 5 && (
+                  <div className="photo-upload-card">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handlePhotoChange}
+                      className="file-input-hidden"
+                      id="photo-input"
+                      data-testid="photo-input"
                     />
-                  ))}
-                </div>
+                    <label htmlFor="photo-input" className="photo-upload-label">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                      </svg>
+                      <span className="photo-upload-text">Agregar Foto</span>
+                      <span className="photo-upload-hint">{5 - fotosPreview.length} restantes</span>
+                    </label>
+                  </div>
+                )}
               </div>
-            )}
-
-            {fotosPreview.length < 5 && (
-              <div className="file-input-container">
+            ) : (
+              <div className="photo-dropzone">
                 <input
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handlePhotoChange}
-                  className="file-input"
-                  id="photo-input"
+                  className="file-input-hidden"
+                  id="photo-input-empty"
                   data-testid="photo-input"
                 />
-                <label htmlFor="photo-input" className="file-input-label">
-                  Seleccionar Fotos
+                <label htmlFor="photo-input-empty" className="dropzone-label">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                  <h3 className="dropzone-title">Agrega fotos de tu producto</h3>
+                  <p className="dropzone-subtitle">Haz clic o arrastra hasta 5 imágenes</p>
+                  <span className="dropzone-formats">JPG, PNG, WEBP</span>
                 </label>
               </div>
             )}
