@@ -133,7 +133,7 @@ export default function ProductModal({ onClose, product }) {
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               className="form-input"
-              placeholder="Ej: Vestido Elegante"
+              placeholder="EJ. CONSOLA DE VIDEOJUEGOS"
               required
               data-testid="product-name-input"
             />
