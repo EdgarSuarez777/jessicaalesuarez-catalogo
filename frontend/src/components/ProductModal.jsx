@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../lib/firebase';
+import { db } from '../lib/firebase';
 import { toast } from 'sonner';
 import { parseColorName } from '../lib/colorDictionary';
 import { compressImage } from '../lib/imageCompressor';
@@ -61,13 +60,12 @@ export default function ProductModal({ onClose, product }) {
     }
 
     try {
-      const compressedFiles = await Promise.all(
+      const compressedDataUrls = await Promise.all(
         files.map(file => compressImage(file))
       );
 
-      const previews = compressedFiles.map(file => URL.createObjectURL(file));
-      setFotosPreview([...fotosPreview, ...previews]);
-      setFotos([...fotos, ...compressedFiles]);
+      setFotosPreview([...fotosPreview, ...compressedDataUrls]);
+      setFotos([...fotos, ...compressedDataUrls]);
     } catch (error) {
       toast.error('Error al procesar imágenes');
     }
@@ -79,20 +77,6 @@ export default function ProductModal({ onClose, product }) {
     if (currentPhotoIndex >= fotosPreview.length - 1) {
       setCurrentPhotoIndex(Math.max(0, fotosPreview.length - 2));
     }
-  };
-
-  const uploadPhotos = async () => {
-    const uploadedUrls = [];
-
-    for (const foto of fotos) {
-      const timestamp = Date.now();
-      const storageRef = ref(storage, `productos/${timestamp}_${foto.name}`);
-      await uploadBytes(storageRef, foto);
-      const url = await getDownloadURL(storageRef);
-      uploadedUrls.push(url);
-    }
-
-    return uploadedUrls;
   };
 
   const handleSubmit = async (e) => {
@@ -109,8 +93,7 @@ export default function ProductModal({ onClose, product }) {
       let fotosUrls = product?.fotos || [];
 
       if (fotos.length > 0) {
-        const newUrls = await uploadPhotos();
-        fotosUrls = [...fotosUrls, ...newUrls];
+        fotosUrls = [...fotosUrls, ...fotos];
       }
 
       const productData = {
