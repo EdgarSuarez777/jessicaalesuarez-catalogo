@@ -1,4 +1,4 @@
-export async function compressImage(file, maxWidth = 1000, quality = 0.7) {
+export async function compressImage(file, maxWidth = 800, quality = 0.5) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -21,7 +21,7 @@ export async function compressImage(file, maxWidth = 1000, quality = 0.7) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const dataUrl = canvas.toDataURL('image/webp', quality);
         resolve(dataUrl);
       };
       
