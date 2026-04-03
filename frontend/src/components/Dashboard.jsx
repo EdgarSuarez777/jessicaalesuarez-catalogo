@@ -13,6 +13,8 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
     loadProducts();
@@ -57,19 +59,29 @@ export default function Dashboard() {
     setFilteredProducts(filtered);
   };
 
-  const handleDelete = async (productId) => {
-    if (!window.confirm('¿Estás segura de eliminar este producto?')) {
-      return;
-    }
+  const handleDeleteClick = (product) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
 
     try {
-      await deleteDoc(doc(db, 'productos', productId));
+      await deleteDoc(doc(db, 'productos', productToDelete.id));
       toast.success('Producto eliminado');
+      setShowDeleteModal(false);
+      setProductToDelete(null);
       loadProducts();
     } catch (error) {
       console.error('Error al eliminar:', error);
       toast.error('Error al eliminar producto');
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
   };
 
   const handleEdit = (product) => {
@@ -181,7 +193,7 @@ export default function Dashboard() {
                     Editar
                   </button>
                   <button 
-                    onClick={() => handleDelete(product.id)} 
+                    onClick={() => handleDeleteClick(product)} 
                     className="delete-button"
                     data-testid="delete-product-button"
                   >
@@ -199,6 +211,32 @@ export default function Dashboard() {
           onClose={handleModalClose} 
           product={editingProduct}
         />
+      )}
+
+      {showDeleteModal && (
+        <div className="delete-modal-overlay" onClick={cancelDelete}>
+          <div className="delete-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="delete-modal-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <h3 className="delete-modal-title">¿Eliminar producto?</h3>
+            <p className="delete-modal-text">
+              ¿Estás segura de eliminar "<strong>{productToDelete?.nombre}</strong>"? Esta acción no se puede deshacer.
+            </p>
+            <div className="delete-modal-actions">
+              <button onClick={cancelDelete} className="delete-cancel-btn">
+                Cancelar
+              </button>
+              <button onClick={confirmDelete} className="delete-confirm-btn">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
