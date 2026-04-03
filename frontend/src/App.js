@@ -6,7 +6,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import CatalogoPublico from './components/CatalogoPublico';
 import { Toaster } from 'sonner';
-import '@/App.css';
+import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
