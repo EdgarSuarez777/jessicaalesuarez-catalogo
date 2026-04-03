@@ -148,7 +148,7 @@ export default function ProductModal({ onClose, product }) {
                 onChange={(e) => setColorInput(e.target.value)}
                 onKeyPress={handleColorKeyPress}
                 className="form-input"
-                placeholder="Escribe un color y presiona Enter"
+                placeholder="Escribe un color"
                 data-testid="color-input"
               />
               <button 
